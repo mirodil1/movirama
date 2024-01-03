@@ -1,0 +1,41 @@
+version: '3'
+
+volumes:
+  movirama_local_postgres_data: {}
+  movirama_local_postgres_data_backups: {}
+  movirama_local_elasticsearch_data: {}
+
+services:
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: ./compose/elasticsearch/Dockerfile
+    image: movirama_local_elasticsearch
+    container_name: movirama_local_elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - movirama_local_elasticsearch_data:/usr/share/elasticsearch/data
+
+    # postgres:
+    #   build:
+    #     context: .
+    #     dockerfile: ./compose/postgres/Dockerfile
+    #   image: movirama_local_postgres
+    #   container_name: movirama_local_postgres
+    #   volumes:
+    #     - movirama_local_postgres_data:/var/lib/postgresql/data
+    #     - movirama_local_postgres_data_backups:/backups
+    #   env_file:
+    #     - ./.envs/.local/.postgres
