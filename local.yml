@@ -27,7 +27,44 @@ services:
       - IPC_LOCK
     volumes:
       - movirama_local_elasticsearch_data:/usr/share/elasticsearch/data
-
+  flask:
+    build:
+      context: .
+      dockerfile: ./compose/flask/Dockerfile
+    # entrypoint:
+    #   - flask
+    #   - run
+    #   - --host=0.0.0.0
+    #   - --port=8000
+    image: movirama-local_flask
+    container_name: movirama_local_flask
+    depends_on:
+      - elasticsearch
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.flask
+    ports:
+      - "8000:8000"
+      - "2992:2992"
+    command: /start
+  # django:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/django/Dockerfile
+  #   image: movirama_local_django
+  #   container_name: movirama_local_django
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   volumes:
+  #     - .:/app:z
+  #   env_file:
+  #     - ./.envs/.local/.django
+  #     - ./.envs/.local/.postgres
+  #   ports:
+  #     - '8000:8000'
+  #   command: /start
     # postgres:
     #   build:
     #     context: .
