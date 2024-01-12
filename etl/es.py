@@ -135,7 +135,7 @@ class ETL:
             'director': [x.strip() for x in row['director'].split(',')] if row['director'] != 'N/A' else None,
             'description': row['plot'] if row['plot'] != 'N/A' else None
         }
-    
+
     def load(self, index_name: str):
         """
         Main ETL method

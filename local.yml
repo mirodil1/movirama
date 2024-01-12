@@ -1,8 +1,8 @@
 version: '3'
 
 volumes:
-  movirama_local_postgres_data: {}
-  movirama_local_postgres_data_backups: {}
+  movirama_local_movies_postgres_data: {}
+  movirama_local_movies_postgres_data_backups: {}
   movirama_local_elasticsearch_data: {}
 
 services:
@@ -12,6 +12,8 @@ services:
       dockerfile: ./compose/elasticsearch/Dockerfile
     image: movirama_local_elasticsearch
     container_name: movirama_local_elasticsearch
+    depends_on:
+      - movies_postgres
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -31,23 +33,30 @@ services:
     build:
       context: .
       dockerfile: ./compose/flask/Dockerfile
-    # entrypoint:
-    #   - flask
-    #   - run
-    #   - --host=0.0.0.0
-    #   - --port=8000
     image: movirama-local_flask
     container_name: movirama_local_flask
     depends_on:
       - elasticsearch
+      - movies_postgres
     volumes:
       - .:/app:z
     env_file:
       - ./.envs/.local/.flask
     ports:
-      - "8000:8000"
+      - "8080:8000"
       - "2992:2992"
     command: /start
+  movies_postgres:
+      build:
+        context: .
+        dockerfile: ./compose/movies_postgres/Dockerfile
+      image: movirama_local_movies_postgres
+      container_name: movirama_local_movies_postgres
+      volumes:
+        - movirama_local_movies_postgres_data:/var/lib/postgresql/data
+        - movirama_local_movies_postgres_data_backups:/backups
+      env_file:
+        - ./.envs/.local/.movies_postgres
   # django:
   #   build:
   #     context: .
@@ -65,14 +74,3 @@ services:
   #   ports:
   #     - '8000:8000'
   #   command: /start
-    # postgres:
-    #   build:
-    #     context: .
-    #     dockerfile: ./compose/postgres/Dockerfile
-    #   image: movirama_local_postgres
-    #   container_name: movirama_local_postgres
-    #   volumes:
-    #     - movirama_local_postgres_data:/var/lib/postgresql/data
-    #     - movirama_local_postgres_data_backups:/backups
-    #   env_file:
-    #     - ./.envs/.local/.postgres
